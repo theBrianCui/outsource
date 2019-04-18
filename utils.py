@@ -6,7 +6,7 @@ def print_stdout(completed_process):
 
 # Synchronously execute a shell command.
 # Exits the script with error code 1 if the command exited with a nonzero code.
-def exec_sync(command, before="", error="", after="",
+def exec_sync(command, before="", error="Something went wrong.", after="Done.",
               capture_out=True, capture_err=False, die=True):
     if before != "":
         if error: error = " {}".format(error)
@@ -18,7 +18,7 @@ def exec_sync(command, before="", error="", after="",
 
     if capture_out == True: stdout = subprocess.PIPE
     if capture_err == True: stderr = subprocess.PIPE
-    if before != "": print(before, end="", flush=True)
+    if before != "": print(before, flush=True)
 
     try:
         process = subprocess.run(command,
@@ -32,6 +32,9 @@ def exec_sync(command, before="", error="", after="",
         print(error_string)
         if die:
             raise RuntimeError(error_string)
+
+    if after: print(after)
+    print()
 
     if process != None and (capture_out or capture_err): return process.stdout.decode("utf-8")
     return ""
