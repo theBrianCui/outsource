@@ -8,6 +8,9 @@ def print_stdout(completed_process):
 # Exits the script with error code 1 if the command exited with a nonzero code.
 def exec_sync(command, before="", error="", after="",
               capture_out=True, capture_err=False, die=True):
+    if before != "":
+        if error: error = " {}".format(error)
+        if after: after = " {}".format(after)
 
     process = None
     stdout = None
@@ -21,12 +24,14 @@ def exec_sync(command, before="", error="", after="",
         process = subprocess.run(command,
                                  stdout=stdout, stderr=stderr,
                                  check=True)
+        if process.returncode != 0:
+            raise RuntimeError("Command exited with nonzero return code {}".format(process.returncode))
+
     except Exception as e:
         if die:
-            raise RuntimeError(error)
+            raise RuntimeError("{}: {}".format(error, e))
         else:
-            print(error)
+            print("{}: {}".format(error, e))
 
-    if after != "": print(after)
     if process != None and (capture_out or capture_err): return process.stdout.decode("utf-8")
     return ""
