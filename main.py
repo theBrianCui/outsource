@@ -2,22 +2,32 @@ from utils import exec_sync, print_stdout
 import json
 import time
 import subprocess
+import sys
 
 # PLEASE CHANGE THESE VARIABLES ACCORDINGLY. 
-rg = "rgsouth20"
-vm = "myvm20"
+RESOURCE_GROUP = "outsource-rgsouth"
+VIRTUAL_MACHINE = "outsource-vm"
 
 # # az group create --name rgsouth --location southcentralus
 
-exec_sync(["az", "group", "create", "--name", rg, "--location", "southcentralus"],
-          "Running echo... ",
-          "echo failed!",
-          "",
-          capture_out=True)
+rg_exists = exec_sync("az group exists --name {}".format(RESOURCE_GROUP).split(" "),
+            "Checking for existing resource group {}...".format(RESOURCE_GROUP),
+            "something went wrong.",
+            "Done.",
+            capture_out=True, die=True).strip()
+
+if rg_exists == "true":
+    print("The resource group {} already exists.".format(RESOURCE_GROUP))
+else:
+    exec_sync(["az", "group", "create", "--name", RESOURCE_GROUP, "--location", "southcentralus"],
+            "Creating resource group {}...".format(RESOURCE_GROUP),
+            "something went wrong.",
+            "Done.",
+            capture_out=True, die=True)
 
 # az vm create --name myvm --resource-group rgsouth --image UbuntuLTS --generate-ssh-keys --size Standard_DS1_v2
 
-exec_sync(["az", "vm", "create", "--name", vm, "--resource-group", rg, "--image", "UbuntuLTS", "--generate-ssh-keys", "--size", "Standard_DS1_v2"],
+exec_sync(["az", "vm", "create", "--name", VIRTUAL_MACHINE, "--resource-group", RESOURCE_GROUP, "--image", "UbuntuLTS", "--generate-ssh-keys", "--size", "Standard_DS1_v2"],
           "Running echo... ",
           "echo failed!",
           "",
@@ -25,14 +35,14 @@ exec_sync(["az", "vm", "create", "--name", vm, "--resource-group", rg, "--image"
 
 # az vm open-port -g rgsouth -n myvm --port '*'
 
-exec_sync(["az", "vm", "open-port", "-g", rg, "-n", vm, "--port", "*"],
+exec_sync(["az", "vm", "open-port", "-g", RESOURCE_GROUP, "-n", VIRTUAL_MACHINE, "--port", "*"],
           "Running echo... ",
           "echo failed!",
           "",
           capture_out=True)
 
 # az vm list-ip-addresses --name myvm
-output = exec_sync(["az", "vm", "list-ip-addresses", "--name", vm],
+output = exec_sync(["az", "vm", "list-ip-addresses", "--name", VIRTUAL_MACHINE],
           "Running echo... ",
           "echo failed!",
           "",
