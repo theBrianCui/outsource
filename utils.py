@@ -28,10 +28,10 @@ def exec_sync(command, before="", error="", after="",
             raise RuntimeError("Command exited with nonzero return code {}".format(process.returncode))
 
     except Exception as e:
+        error_string = "{}: {}".format(error, e) if error else "{}".format(e)
+        print(error_string)
         if die:
-            raise RuntimeError("{}: {}".format(error, e))
-        else:
-            print("{}: {}".format(error, e))
+            raise RuntimeError(error_string)
 
     if process != None and (capture_out or capture_err): return process.stdout.decode("utf-8")
     return ""

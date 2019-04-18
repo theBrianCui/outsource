@@ -12,7 +12,7 @@ rg_exists = exec_sync("az group exists --name {}".format(RESOURCE_GROUP).split("
             "Checking for existing resource group {}...".format(RESOURCE_GROUP),
             "something went wrong.",
             "Done.",
-            capture_out=True).strip()
+            capture_out=True, die=True).strip()
 
 if rg_exists == "true":
     print("The resource group {} already exists.".format(RESOURCE_GROUP))
@@ -21,7 +21,7 @@ else:
             "Creating resource group {}...".format(RESOURCE_GROUP),
             "something went wrong.",
             "Done.",
-            capture_out=True)
+            capture_out=True, die=True)
 
 # az vm create --name myvm --resource-group rgsouth --image UbuntuLTS --generate-ssh-keys --size Standard_DS1_v2
 
