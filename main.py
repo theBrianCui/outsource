@@ -1,10 +1,14 @@
-from utils import exec_sync, print_stdout
+from utils import exec_sync, read_file_to_string, get_env, delete_file, write_string_to_file
 import json
 import time
 import subprocess
 import sys
 
-# PLEASE CHANGE THESE VARIABLES ACCORDINGLY. 
+# PLEASE CHANGE THESE VARIABLES ACCORDINGLY.
+SEND_EMAIL = False
+SEND_EMAIL_ADDRESS = "brianzcui" + "@gmail.com"
+SEND_EMAIL_SCRIPT = "scripts/email.sh"
+
 RESOURCE_GROUP = "outsource-rgsouth"
 VIRTUAL_MACHINE = "outsource-vm"
 
@@ -41,6 +45,20 @@ arr = json.loads(output)
 ip = arr[0]["virtualMachine"]["network"]["publicIpAddresses"][0]["ipAddress"]
 port = 8000
 print(str(ip) + ":" + str(port))
+
+if SEND_EMAIL and get_env("SENDGRID_API_KEY"):
+    print("Preparing email send script...")
+    email_script = read_file_to_string(SEND_EMAIL_SCRIPT)
+    email_script = email_script.replace("SENDGRID_API_KEY", get_env("SENDGRID_API_KEY"))
+    email_script = email_script.replace("RECIPIENT", SEND_EMAIL_ADDRESS)
+    email_script = email_script.replace("SUBJECT", "Hello from Outsource Script!")
+    email_script = email_script.replace("BODY", "Hello from Outsource!")
+    delete_file(SEND_EMAIL_SCRIPT + ".tmp")
+    write_string_to_file(email_script, SEND_EMAIL_SCRIPT + ".tmp")
+
+    print(read_file_to_string(SEND_EMAIL_SCRIPT + ".tmp"))
+    print("Sending email on remote server...")
+    subprocess.call('ssh {} -o StrictHostKeyChecking=no "bash -s" < {}.tmp'.format(ip, SEND_EMAIL_SCRIPT), shell=True)
 
 # TODO: Make output go to file instead of NULL.
 # https://stackoverflow.com/questions/35327623/python-subprocess-run-a-remote-process-in-background-and-immediately-close-the-c

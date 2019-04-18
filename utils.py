@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import os
 
 def print_stdout(completed_process):
     print(completed_process.stdout.decode("utf-8"), end="")
@@ -38,3 +39,19 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
 
     if process != None and (capture_out or capture_err): return process.stdout.decode("utf-8")
     return ""
+
+def read_file_to_string(filename):
+    with open(filename, 'r') as myfile:
+        data = myfile.read()
+    return data
+
+def get_env(name):
+    return os.environ[name]
+
+def write_string_to_file(string, filename):
+    with open(filename, "w") as text_file:
+        text_file.write(string)
+
+def delete_file(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
