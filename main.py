@@ -12,6 +12,7 @@ SEND_EMAIL_SCRIPT = "scripts/email.sh"
 RESOURCE_GROUP = "outsource-rgsouth"
 VIRTUAL_MACHINE = "outsource-vm"
 
+
 # # az group create --name rgsouth --location southcentralus
 
 rg_exists = exec_sync("az group exists --name {}".format(RESOURCE_GROUP).split(" "),
@@ -64,7 +65,7 @@ if SEND_EMAIL and get_env("SENDGRID_API_KEY"):
 # https://stackoverflow.com/questions/35327623/python-subprocess-run-a-remote-process-in-background-and-immediately-close-the-c
 
 # ["ssh", ip, "-o", "StrictHostKeyChecking=no", "nohup python -m SimpleHTTPServer %d >/home/msf1013/logs 2>&1 &" % (port)]
-s = exec_sync(["ssh", ip, "-o", "StrictHostKeyChecking=no", "nohup python -m SimpleHTTPServer %d >/home/msf1013/logs 2>&1 &" % (port)],
+s = exec_sync(["ssh", ip, "-o", "StrictHostKeyChecking=no", "nohup python -m SimpleHTTPServer %d >/tmp/logs 2>&1 &" % (port)],
           "Running echo... ",
           "echo failed!",
           "",
@@ -73,7 +74,7 @@ s = exec_sync(["ssh", ip, "-o", "StrictHostKeyChecking=no", "nohup python -m Sim
 i = 1
 while True:
      time.sleep(5)
-     process = subprocess.Popen("ssh %s -o StrictHostKeyChecking=no cat /home/msf1013/logs" % (ip), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+     process = subprocess.Popen("ssh %s -o StrictHostKeyChecking=no cat /tmp/logs" % (ip), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
      output,stderr = process.communicate()
      status = process.poll()
      print("Polling %d:" % (i))
