@@ -50,7 +50,10 @@ def read_file_to_string(filename):
 def get_env(name):
     return os.environ[name]
 
-def write_string_to_file(string, filename):
+def write_string_to_file(string, filename, overwrite=False):
+    if overwrite:
+        delete_file(filename)
+
     with open(filename, "w") as text_file:
         text_file.write(string)
 

@@ -27,7 +27,7 @@ def upload_script(script_path, ip):
     upload_file(script_path, ip, "{}{}".format(REMOTE_SCRIPT_ROOT, basename))
 
 def run_remote_script(script_path, ip, capture_out=True):
-    print("run remote command")
+    print("run remote script")
     upload_script(script_path, ip)
     basename = os.path.basename(script_path)
     return run_remote_command(ip, "bash {}{}".format(REMOTE_SCRIPT_ROOT, basename),
