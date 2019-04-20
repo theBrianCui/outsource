@@ -8,7 +8,7 @@ def print_stdout(completed_process):
 # Synchronously execute a shell command.
 # Exits the script with error code 1 if the command exited with a nonzero code.
 def exec_sync(command, before="", error="Something went wrong.", after="Done.",
-              capture_out=True, capture_err=False, die=True):
+              capture_out=True, die=True, shell=False):
     if before != "":
         if error: error = " {}".format(error)
         if after: after = " {}".format(after)
@@ -17,8 +17,10 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
     stdout = None
     stderr = None
 
-    if capture_out == True: stdout = subprocess.PIPE
-    if capture_err == True: stderr = subprocess.PIPE
+    if capture_out == True:
+        stdout = subprocess.PIPE
+        stderr = subprocess.PIPE
+
     if before != "": print(before, flush=True)
 
     try:
@@ -37,7 +39,7 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
     if after: print(after)
     print()
 
-    if process != None and (capture_out or capture_err): return process.stdout.decode("utf-8")
+    if process != None and capture_out: return process.stdout.decode("utf-8")
     return ""
 
 def read_file_to_string(filename):
