@@ -13,7 +13,6 @@ SEND_EMAIL_SCRIPT = "scripts/email.sh"
 RESOURCE_GROUP = "outsource-rgsouth"
 VIRTUAL_MACHINE = "outsource-vm"
 
-
 # # az group create --name rgsouth --location southcentralus
 
 rg_exists = exec_sync("az group exists --name {}".format(RESOURCE_GROUP).split(" "),
@@ -27,10 +26,21 @@ else:
             "Creating resource group {}...".format(RESOURCE_GROUP),
             capture_out=True, die=True)
 
-# az vm create --name myvm --resource-group rgsouth --image UbuntuLTS --generate-ssh-keys --size Standard_DS1_v2
-exec_sync(["az", "vm", "create", "--name", VIRTUAL_MACHINE, "--resource-group", RESOURCE_GROUP, "--image", "UbuntuLTS", "--generate-ssh-keys", "--size", "Standard_DS1_v2"],
-          "Creating virtual machine {}...".format(VIRTUAL_MACHINE),
-          capture_out=True)
+vm_list = exec_sync("az vm list -g {}".format(RESOURCE_GROUP).split(" "),
+            "Checking for existing VM {}...".format(VIRTUAL_MACHINE))
+vm_array = json.loads(vm_list)
+vm_exists = False
+for vm in vm_array:
+    if vm["name"].strip() == VIRTUAL_MACHINE:
+        print("VM {} already exists.".format(VIRTUAL_MACHINE))
+        vm_exists = True
+        break
+
+if not vm_exists:
+    # az vm create --name myvm --resource-group rgsouth --image UbuntuLTS --generate-ssh-keys --size Standard_DS1_v2
+    exec_sync(["az", "vm", "create", "--name", VIRTUAL_MACHINE, "--resource-group", RESOURCE_GROUP, "--image", "UbuntuLTS", "--generate-ssh-keys", "--size", "Standard_DS1_v2"],
+            "Creating virtual machine {}...".format(VIRTUAL_MACHINE),
+            capture_out=True)
 
 # az vm open-port -g rgsouth -n myvm --port '*'
 exec_sync(["az", "vm", "open-port", "-g", RESOURCE_GROUP, "-n", VIRTUAL_MACHINE, "--port", "*"],
@@ -60,10 +70,10 @@ if SEND_EMAIL and get_env("SENDGRID_API_KEY"):
 
     print(read_file_to_string(SEND_EMAIL_SCRIPT + ".tmp"))
     print("Sending email on remote server...")
-    ssh.run_remote_script("{}.tmp", ip)
+    ssh.run_remote_script("{}.tmp".format(SEND_EMAIL_SCRIPT), ip)
     # subprocess.call('ssh {} -o StrictHostKeyChecking=no "bash -s" < {}.tmp'.format(ip, SEND_EMAIL_SCRIPT), shell=True)
 
-sys.exit(0)
+#sys.exit(0)
 
 # TODO: Make output go to file instead of NULL.
 # https://stackoverflow.com/questions/35327623/python-subprocess-run-a-remote-process-in-background-and-immediately-close-the-c
