@@ -25,7 +25,7 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
 
     try:
         process = subprocess.run(command,
-                                 stdout=stdout, stderr=stderr,
+                                 stdout=stdout, stderr=stderr, shell=shell,
                                  check=True)
         if process.returncode != 0:
             raise RuntimeError("Command exited with nonzero return code {}".format(process.returncode))

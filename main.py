@@ -3,6 +3,7 @@ import json
 import time
 import subprocess
 import sys
+import ssh
 
 # PLEASE CHANGE THESE VARIABLES ACCORDINGLY.
 SEND_EMAIL = False
@@ -59,7 +60,10 @@ if SEND_EMAIL and get_env("SENDGRID_API_KEY"):
 
     print(read_file_to_string(SEND_EMAIL_SCRIPT + ".tmp"))
     print("Sending email on remote server...")
-    subprocess.call('ssh {} -o StrictHostKeyChecking=no "bash -s" < {}.tmp'.format(ip, SEND_EMAIL_SCRIPT), shell=True)
+    ssh.run_remote_script("{}.tmp", ip)
+    # subprocess.call('ssh {} -o StrictHostKeyChecking=no "bash -s" < {}.tmp'.format(ip, SEND_EMAIL_SCRIPT), shell=True)
+
+sys.exit(0)
 
 # TODO: Make output go to file instead of NULL.
 # https://stackoverflow.com/questions/35327623/python-subprocess-run-a-remote-process-in-background-and-immediately-close-the-c
