@@ -13,6 +13,10 @@ from utils import (delete_file, exec_sync, get_env, read_file_to_string,
 DESCRIPTION = "Outsource is a command line tool for running commands remotely."
 
 parser = argparse.ArgumentParser(description=DESCRIPTION)
+parser.add_argument('-v', '--vm', nargs=1,
+    help="Run the job on a specific VM. The VM will be created if it does not exist.",
+    default="outsource-vm-1")
+
 parser.add_argument('-e', '--email', nargs=1, help="Send an email to the specified address when the job completes.")
 parser.add_argument('args', nargs=argparse.REMAINDER)
 
@@ -31,10 +35,9 @@ print(ARGUMENT_STRING_FULL)
 
 # PLEASE CHANGE THESE VARIABLES ACCORDINGLY.
 SEND_EMAIL_ADDRESS = ARGUMENTS.email
-SEND_EMAIL_SCRIPT = "scripts/email.sh"
 
 RESOURCE_GROUP = "outsource-rgsouth-1"
-VIRTUAL_MACHINE = "outsource-vm-1"
+VIRTUAL_MACHINE = ARGUMENTS.vm
 
 # # az group create --name rgsouth --location southcentralus
 
