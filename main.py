@@ -33,8 +33,8 @@ print(ARGUMENT_STRING_FULL)
 SEND_EMAIL_ADDRESS = ARGUMENTS.email
 SEND_EMAIL_SCRIPT = "scripts/email.sh"
 
-RESOURCE_GROUP = "outsource-rgsouth"
-VIRTUAL_MACHINE = "outsource-vm"
+RESOURCE_GROUP = "outsource-rgsouth-1"
+VIRTUAL_MACHINE = "outsource-vm-1"
 
 # # az group create --name rgsouth --location southcentralus
 
@@ -87,15 +87,10 @@ if SEND_EMAIL_ADDRESS:
     except Exception as e:
         print(e)
 
-# TODO: Make output go to file instead of NULL.
-# https://stackoverflow.com/questions/35327623/python-subprocess-run-a-remote-process-in-background-and-immediately-close-the-c
+command = "python -m SimpleHTTPServer 8000"
 
-# ["ssh", ip, "-o", "StrictHostKeyChecking=no", "nohup python -m SimpleHTTPServer %d >/home/msf1013/logs 2>&1 &" % (port)]
-s = exec_sync(["ssh", ip, "-o", "StrictHostKeyChecking=no", "nohup python -m SimpleHTTPServer %d >/tmp/logs 2>&1 &" % (port)],
-          "Running echo... ",
-          "echo failed!",
-          "",
-          capture_out=True)
+ssh.upload_file("monitor.py", ip, "/tmp/outsource/scripts/")
+ssh.run_remote_command(ip, "python /tmp/outsource/scripts/monitor.py " + command, capture_out=True)
 
 i = 1
 while True:
