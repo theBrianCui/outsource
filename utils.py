@@ -24,6 +24,7 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
     if before != "": print(before, flush=True)
 
     try:
+        print(command)
         process = subprocess.run(command,
                                  stdout=stdout, stderr=stderr, shell=shell,
                                  check=True)
