@@ -6,7 +6,9 @@ import argparse
 import shlex
 
 import ssh
-import email
+import email2
+from fabric.runners import Remote
+from fabric.connection import Connection
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
 
@@ -15,7 +17,7 @@ DESCRIPTION = "Outsource is a command line tool for running commands remotely."
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 parser.add_argument('-v', '--vm', nargs=1,
     help="Run the job on a specific VM. The VM will be created if it does not exist.",
-    default="outsource-vm-1")
+    default="outsource-vm-5")
 
 parser.add_argument('-e', '--email', nargs=1, help="Send an email to the specified address when the job completes.")
 parser.add_argument('args', nargs=argparse.REMAINDER)
@@ -84,23 +86,23 @@ ip = arr[0]["virtualMachine"]["network"]["publicIpAddresses"][0]["ipAddress"]
 port = 8000
 print(str(ip) + ":" + str(port))
 
-if SEND_EMAIL_ADDRESS:
+if False:
     try:
-        ssh.run_remote_script(email.create_email_script(SEND_EMAIL_ADDRESS), ip)
+        ssh.run_remote_script(email2.create_email_script(SEND_EMAIL_ADDRESS), ip)
     except Exception as e:
         print(e)
 
-command = "python -m SimpleHTTPServer 8000"
+command = ARGUMENT_STRING_FULL
+runner = Remote(context=Connection(host=ip))
+runner.start(command, "", "")
 
-ssh.upload_file("monitor.py", ip, "/tmp/outsource/scripts/")
-ssh.run_remote_command(ip, "python /tmp/outsource/scripts/monitor.py " + command, capture_out=True)
+while not runner.process_is_finished:
+     print("Waiting for task to finish...")
+     time.sleep(3)
 
-i = 1
-while True:
-     time.sleep(5)
-     process = subprocess.Popen("ssh %s -o StrictHostKeyChecking=no cat /tmp/logs" % (ip), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-     output,stderr = process.communicate()
-     status = process.poll()
-     print("Polling %d:" % (i))
-     print(output)
-     i += 1
+print("1) Std out")
+print(runner.read_proc_stdout(5000).decode("utf-8"))
+print("2) Std error")
+print(runner.read_proc_stderr(5000).decode("utf-8"))
+print("3) Return code")
+print(runner.returncode())
