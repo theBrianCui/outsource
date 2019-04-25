@@ -10,6 +10,20 @@ def run_remote_command(ip, command, capture_out=True):
                        capture_out=capture_out, shell=True)
     return output
 
+def check_remote_program_exists(ip, program):
+    print("remote check program exists")
+    remote_command_path = run_remote_command(ip, "command -v {} || true".format(program), capture_out=True)
+    print("remote command path: {}".format(remote_command_path))
+    return remote_command_path.strip() != ""
+
+def remote_apt_get_program(ip, program):
+    print("remote apt get")
+    try:
+        run_remote_command(ip, "sudo apt-get install -y {}".format(program))
+    except Exception:
+        pass
+    return check_remote_program_exists(ip, program)
+
 def get_local_user():
     print("get local user")
     current_user = exec_sync(["whoami"], "", "", "")

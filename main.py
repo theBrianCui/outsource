@@ -26,8 +26,8 @@ ARGUMENT_PROGRAM = ""               # the base program, e.g. cowsay
 ARGUMENT_STRING_FULL = ""           # the full argument string, e.g. cowsay hello world
 for arg in ARGUMENTS.args:
     if ARGUMENT_STRING_FULL == "":
-        ARGUMENT_PROGRAM = arg
-        ARGUMENT_STRING_FULL += arg
+        ARGUMENT_PROGRAM = shlex.quote(arg)
+        ARGUMENT_STRING_FULL += ARGUMENT_PROGRAM
     else:
         ARGUMENT_STRING_FULL += " {}".format(shlex.quote(arg)) # escape arguments if necessary
 
@@ -94,6 +94,16 @@ if SEND_EMAIL_ADDRESS:
         ssh.run_remote_script(email.create_email_script(SEND_EMAIL_ADDRESS), ip)
     except Exception as e:
         print(e)
+
+# install dependencies
+if not ssh.check_remote_program_exists(ip, ARGUMENT_PROGRAM):
+    print("{} does not exist on the remote machine.".format(ARGUMENT_PROGRAM))
+    print("Attempting install via apt-get...")
+    if not ssh.remote_apt_get_program(ip, ARGUMENT_PROGRAM):
+        print("Could not install {} via apt-get.".format(ARGUMENT_PROGRAM))
+        sys.exit(0)
+
+print("{} program exists".format(ARGUMENT_PROGRAM))
 
 nohup_script_name, remote_log_name = ssh.create_nohup_script(ARGUMENT_STRING_FULL)
 ssh.run_remote_script(nohup_script_name, ip)
