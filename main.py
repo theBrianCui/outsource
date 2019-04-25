@@ -15,9 +15,10 @@ DESCRIPTION = "Outsource is a command line tool for running commands remotely."
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 parser.add_argument('-v', '--vm', nargs=1,
     help="Run the job on a specific VM. The VM will be created if it does not exist.",
-    default="outsource-vm-1")
+    default=["outsource-vm"])
 
 parser.add_argument('-e', '--email', nargs=1, help="Send an email to the specified address when the job completes.")
+parser.add_argument('-p', '--ports', action='store_true', help="Open all inbound ports to the VM.")
 parser.add_argument('args', nargs=argparse.REMAINDER)
 
 ARGUMENTS = parser.parse_args()
@@ -30,14 +31,17 @@ for arg in ARGUMENTS.args:
     else:
         ARGUMENT_STRING_FULL += " {}".format(shlex.quote(arg)) # escape arguments if necessary
 
-print(ARGUMENTS)
-print(ARGUMENT_STRING_FULL)
+if len(ARGUMENT_STRING_FULL) == 0:
+    parser.print_help()
+    sys.exit(1)
 
 # PLEASE CHANGE THESE VARIABLES ACCORDINGLY.
 SEND_EMAIL_ADDRESS = ARGUMENTS.email
 
-RESOURCE_GROUP = "outsource-rgsouth-1"
-VIRTUAL_MACHINE = ARGUMENTS.vm
+RESOURCE_GROUP = "outsource-rgsouth"
+VIRTUAL_MACHINE = ARGUMENTS.vm[0]
+
+# sys.exit(0)
 
 # # az group create --name rgsouth --location southcentralus
 
@@ -69,9 +73,10 @@ if not vm_exists:
             capture_out=True)
 
 # az vm open-port -g rgsouth -n myvm --port '*'
-exec_sync(["az", "vm", "open-port", "-g", RESOURCE_GROUP, "-n", VIRTUAL_MACHINE, "--port", "*"],
-          "Opening ports * ...",
-          capture_out=True)
+if ARGUMENTS.ports:
+    exec_sync(["az", "vm", "open-port", "-g", RESOURCE_GROUP, "-n", VIRTUAL_MACHINE, "--port", "*"],
+            "Opening ports * ...",
+            capture_out=True)
 
 # az vm list-ip-addresses --name myvm
 output = exec_sync(["az", "vm", "list-ip-addresses", "--name", VIRTUAL_MACHINE],
@@ -90,17 +95,22 @@ if SEND_EMAIL_ADDRESS:
     except Exception as e:
         print(e)
 
-command = "python -m SimpleHTTPServer 8000"
+nohup_script_name, remote_log_name = ssh.create_nohup_script(ARGUMENT_STRING_FULL)
+ssh.run_remote_script(nohup_script_name, ip)
 
-ssh.upload_file("monitor.py", ip, "/tmp/outsource/scripts/")
-ssh.run_remote_command(ip, "python /tmp/outsource/scripts/monitor.py " + command, capture_out=True)
+print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
 
-i = 1
-while True:
-     time.sleep(5)
-     process = subprocess.Popen("ssh %s -o StrictHostKeyChecking=no cat /tmp/logs" % (ip), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-     output,stderr = process.communicate()
-     status = process.poll()
-     print("Polling %d:" % (i))
-     print(output)
-     i += 1
+# command = "python -m SimpleHTTPServer 8000"
+
+# ssh.upload_file("monitor.py", ip, "/tmp/outsource/scripts/")
+# ssh.run_remote_command(ip, "python /tmp/outsource/scripts/monitor.py " + command, capture_out=True)
+
+# i = 1
+# while True:
+#      time.sleep(5)
+#      process = subprocess.Popen("ssh %s -o StrictHostKeyChecking=no cat /tmp/logs" % (ip), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+#      output,stderr = process.communicate()
+#      status = process.poll()
+#      print("Polling %d:" % (i))
+#      print(output)
+#      i += 1
