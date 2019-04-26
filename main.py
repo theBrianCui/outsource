@@ -4,6 +4,7 @@ import sys
 import time
 import argparse
 import shlex
+import os.path
 
 import ssh
 import email
@@ -22,9 +23,10 @@ parser.add_argument('-p', '--ports', action='store_true', help="Open all inbound
 parser.add_argument('args', nargs=argparse.REMAINDER)
 
 ARGUMENTS = parser.parse_args()
+ARGUMENT_ARRAY = tuple(ARGUMENTS.args)
 ARGUMENT_PROGRAM = ""               # the base program, e.g. cowsay
 ARGUMENT_STRING_FULL = ""           # the full argument string, e.g. cowsay hello world
-for arg in ARGUMENTS.args:
+for arg in ARGUMENT_ARRAY:
     if ARGUMENT_STRING_FULL == "":
         ARGUMENT_PROGRAM = shlex.quote(arg)
         ARGUMENT_STRING_FULL += ARGUMENT_PROGRAM
@@ -95,6 +97,8 @@ if SEND_EMAIL_ADDRESS:
     except Exception as e:
         print(e)
 
+job_name, nohup_script_name, remote_log_name = ssh.create_job(ARGUMENT_STRING_FULL)
+
 # install dependencies
 if not ssh.check_remote_program_exists(ip, ARGUMENT_PROGRAM):
     print("{} does not exist on the remote machine.".format(ARGUMENT_PROGRAM))
@@ -105,9 +109,13 @@ if not ssh.check_remote_program_exists(ip, ARGUMENT_PROGRAM):
 
 print("{} program exists".format(ARGUMENT_PROGRAM))
 
-nohup_script_name, remote_log_name = ssh.create_nohup_script(ARGUMENT_STRING_FULL)
-ssh.run_remote_script(nohup_script_name, ip)
+# search for local file dependencies in the command line
+for arg in ARGUMENT_ARRAY:
+    if os.path.exists(arg) and os.path.isfile(arg):
+        print("Found local file dependency: {}".format(arg))
+        ssh.upload_job_file(arg, ip, job_name)
 
+ssh.run_remote_script(nohup_script_name, ip)
 print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
 
 # command = "python -m SimpleHTTPServer 8000"

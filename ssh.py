@@ -2,6 +2,7 @@ import os
 from utils import exec_sync, read_file_to_string, write_string_to_file
 import time
 
+REMOTE_JOB_ROOT = "/tmp/outsource/jobs/"
 REMOTE_SCRIPT_ROOT = "/tmp/outsource/scripts/"
 
 def run_remote_command(ip, command, capture_out=True):
@@ -33,8 +34,14 @@ def upload_file(local_path, ip, dest_path):
     print("upload file")
     dirname = os.path.dirname(dest_path)
     run_remote_command(ip, "mkdir -p {}".format(dirname))
-    exec_sync("scp {} {}@{}:{}".format(local_path, get_local_user(), ip, dest_path),
+    exec_sync("scp -r {} {}@{}:{}".format(local_path, get_local_user(), ip, dest_path),
               capture_out=False, shell=True)
+
+def upload_job_file(local_path, ip, jobname):
+    print("upload job file")
+    dirname = "{}{}/".format(REMOTE_JOB_ROOT, jobname)
+    filename = os.path.basename(local_path)
+    upload_file(local_path, ip, dirname + filename)
 
 def upload_script(script_path, ip):
     print("upload script")
@@ -48,17 +55,18 @@ def run_remote_script(script_path, ip, capture_out=True):
     remote_script_path = upload_script(script_path, ip)
     return run_remote_command(ip, "bash " + remote_script_path, capture_out=capture_out)
 
-def create_nohup_script(command):
+def create_job(command):
     program_name = command.split(" ")[0]
-    file_base_name = "{}_{}".format(program_name, int(time.time()))
+    job_name = "{}_{}".format(program_name, int(time.time()))
 
-    temp_script_name = file_base_name + ".job"
+    temp_script_name = job_name + ".job"
     temp_script_path = "scripts/" + temp_script_name
-    temp_log_name = file_base_name + ".log"
+    temp_log_name = job_name + ".log"
 
     nohup_script = read_file_to_string("scripts/nohup.sh")
+    nohup_script = nohup_script.replace("JOB_NAME", job_name)
     nohup_script = nohup_script.replace("COMMAND_NAME", command)
     nohup_script = nohup_script.replace("LOG_NAME", temp_log_name)
 
     write_string_to_file(nohup_script, temp_script_path)
-    return temp_script_path, temp_log_name
+    return job_name, temp_script_path, temp_log_name
