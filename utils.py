@@ -24,7 +24,6 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
     if before != "": print(before, flush=True)
 
     try:
-        print(command)
         process = subprocess.run(command,
                                  stdout=stdout, stderr=stderr, shell=shell,
                                  check=True)
@@ -37,8 +36,7 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
         if die:
             raise RuntimeError(error_string)
 
-    if after: print(after)
-    print()
+    if after: print(after+"\n")
 
     if process != None and capture_out: return process.stdout.decode("utf-8")
     return ""

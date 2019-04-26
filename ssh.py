@@ -5,9 +5,9 @@ import time
 REMOTE_SCRIPT_ROOT = "/tmp/outsource/scripts/"
 
 def run_remote_command(ip, command, capture_out=True):
-    print("run remote command")
+    #print("run remote command")
     output = exec_sync('ssh {} -o StrictHostKeyChecking=no "{}"'.format(ip, command),
-                       capture_out=capture_out, shell=True)
+                       capture_out=capture_out, shell=True, after=None)
     return output
 
 def get_local_user():
