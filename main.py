@@ -20,7 +20,11 @@ parser.add_argument('-v', '--vm', nargs=1,
 
 parser.add_argument('-e', '--email', nargs=1, help="Send an email to the specified address when the job completes.")
 parser.add_argument('-p', '--ports', action='store_true', help="Open all inbound ports to the VM.")
-parser.add_argument('args', nargs=argparse.REMAINDER)
+parser.add_argument('args', nargs=argparse.REMAINDER, help="COMMAND")
+
+subparsers = parser.add_subparsers(dest='command_name')
+parser_vm = subparsers.add_parser('vm', help='Create, list, modify and delete Outsource VMs.')
+parser_vm.add_argument('--list', dest='vm_list', action='store_true', help='List Outsource VMs and public IP addresses.')
 
 ARGUMENTS = parser.parse_args()
 ARGUMENT_ARRAY = tuple(ARGUMENTS.args)
@@ -32,6 +36,10 @@ for arg in ARGUMENT_ARRAY:
         ARGUMENT_STRING_FULL += ARGUMENT_PROGRAM
     else:
         ARGUMENT_STRING_FULL += " {}".format(shlex.quote(arg)) # escape arguments if necessary
+
+# print(ARGUMENTS)
+# parser_vm.print_help()
+# sys.exit(0)
 
 if len(ARGUMENT_STRING_FULL) == 0:
     parser.print_help()
