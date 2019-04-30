@@ -5,8 +5,8 @@ import time
 import argparse
 import shlex
 
-import ssh
-import email
+import sshtools
+import mail
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
 
@@ -15,7 +15,7 @@ def run_list():
     print('{:<17}{:<10}{}'.format("Host", "Status", "Command"))
     for line in tasks:
         (host, command) = line.split(maxsplit=1)
-        output = ssh.run_remote_command(host, "ps aux")
+        output = sshtools.run_remote_command(host, "ps aux")
         status = "Running" if command in output else "Finished"
         print('{:<17}{:<10}{}'.format(host, status, command), end="")
 

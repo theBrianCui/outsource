@@ -1,17 +1,16 @@
+import argparse
 import json
+import os.path
+import shlex
 import subprocess
 import sys
 import time
-import argparse
-import shlex
-import os.path
 
-import ssh
-import email
+import mail
+import run
+from az import az_resource_group_exists
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
-from az import az_resource_group_exists
-import run
 
 DESCRIPTION = "Outsource is a command line tool for running commands remotely."
 RESOURCE_GROUP = "outsource-rgsouth"
