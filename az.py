@@ -59,3 +59,17 @@ def az_vm_list(resource_group, print=False, show_ip=True, silent=True):
         vm_info_list.append(vm_info)
 
     return vm_info_list
+
+def az_create_vm(resource_group, name, hardware="Standard_DS1_v2", silent=False):
+    before = ""
+    after = ""
+    if not silent:
+        before = "Creating virtual machine {} with hardware profile {}...".format(name, hardware)
+        after = "Done."
+
+    # az vm create --name myvm --resource-group rgsouth --image UbuntuLTS --generate-ssh-keys --size Standard_DS1_v2
+    exec_sync(["az", "vm", "create", "--name", name, "--resource-group", resource_group, "--image", "UbuntuLTS", "--generate-ssh-keys", "--size", hardware],
+                before=before, after=after,
+                capture_out=True)
+
+    return az_vm_get_ip(resource_group, name)

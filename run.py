@@ -35,12 +35,8 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
             break
 
     if not vm_exists:
-        # az vm create --name myvm --resource-group rgsouth --image UbuntuLTS --generate-ssh-keys --size Standard_DS1_v2
-        exec_sync(["az", "vm", "create", "--name", virtual_machine, "--resource-group", resource_group, "--image", "UbuntuLTS", "--generate-ssh-keys", "--size", "Standard_DS1_v2"],
-                "Creating virtual machine {}...".format(virtual_machine),
-                capture_out=True)
+        vm_ip = az.az_create_vm(resource_group, virtual_machine)
         vm_exists = True
-        vm_ip = az.az_vm_get_ip(resource_group, virtual_machine)
 
     # az vm open-port -g rgsouth -n myvm --port '*'
     if open_ports:

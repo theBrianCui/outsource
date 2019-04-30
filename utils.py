@@ -7,7 +7,7 @@ def print_stdout(completed_process):
 
 # Synchronously execute a shell command.
 # Exits the script with error code 1 if the command exited with a nonzero code.
-def exec_sync(command, before="", error="Something went wrong.", after="Done.",
+def exec_sync(command, before="", error="Something went wrong.", after="",
               capture_out=True, die=True, shell=False):
     if before != "":
         if error: error = " {}".format(error)
