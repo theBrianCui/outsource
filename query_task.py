@@ -22,16 +22,21 @@ def run_list():
 def run_fetch_data(task_id):
     # Find host that runs given task
     host = ""
-    for line in tasks:
-        (t_id, h, _) = line.split(maxsplit=2)
-        if t_id == task_id:
-            host = h
-            break
+    job_name = ""
+    with open("scripts/jobs", "r") as file:
+        for line in file:
+            (t_id, h, job_name, _) = line.split(maxsplit=3)
+            if t_id == task_id:
+                host = h
+                break
 
-    # Compress directory in host
-    #output = ssh.run_remote_command(host, "")
-
+    # Compress task's directory in VM
     print("Fetching data for task no. %s!" % (task_id))
+    output = sshtools.run_remote_command(host, "tar -C /tmp/outsource/jobs -cvf /tmp/outsource/jobs/task_%s.gz.tar %s" % (task_id, job_name))
+
+    # Transfer .zip to host
+    process = subprocess.Popen("scp %s:/tmp/outsource/jobs/task_%s.gz.tar task_%s.gz.tar" % (host, task_id, task_id), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print("Successfully downloaded data from task no. %s in task_%s.gz.tar!" % (task_id, task_id))
 
 
 def run_stop(task_id):
