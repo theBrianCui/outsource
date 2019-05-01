@@ -4,7 +4,7 @@ import shlex
 import os
 
 from az import az_resource_group_exists
-from utils import exec_sync
+from utils import exec_sync, add_job_to_list
 import ssh
 
 def outsource(arguments, resource_group, virtual_machine, open_ports=False, email=""):
@@ -84,6 +84,8 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
 
     ssh.run_remote_script(nohup_script_name, ip)
     print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
+
+    add_job_to_list(ip, ARGUMENT_STRING_FULL, job_name)
 
     # command = "python -m SimpleHTTPServer 8000"
 

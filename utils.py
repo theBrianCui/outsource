@@ -5,6 +5,22 @@ import os
 def print_stdout(completed_process):
     print(completed_process.stdout.decode("utf-8"), end="")
 
+def add_job_to_list(host, command, job_name):
+    # Get last line and read last task_id
+    task_id = -1
+    with open("scripts/jobs", "r") as file:
+        lines = file.readlines()
+        if len(lines) == 0:
+            task_id = 1
+        else:
+            last_line = lines[-1]
+            (task_id, _) = last_line.split(maxsplit=1)
+            task_id = int(task_id) + 1
+
+    # Add new task to file
+    with open("scripts/jobs", "a") as file:
+        file.write("%d %s %s %s" % (task_id, host, job_name, command))
+
 # Synchronously execute a shell command.
 # Exits the script with error code 1 if the command exited with a nonzero code.
 def exec_sync(command, before="", error="Something went wrong.", after="Done.",
@@ -18,7 +34,7 @@ def exec_sync(command, before="", error="Something went wrong.", after="Done.",
     stderr = None
 
     if capture_out == True:
-        stdout = subprocess.PIPE
+        stdout = subprocess.PIPE    
         stderr = subprocess.PIPE
 
     if before != "": print(before, flush=True)
