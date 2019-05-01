@@ -19,11 +19,11 @@ def add_job_to_list(host, command, job_name):
 
     # Add new task to file
     with open("scripts/jobs", "a") as file:
-        file.write("%d %s %s %s" % (task_id, host, job_name, command))
+        file.write("%d %s %s %s\n" % (task_id, host, job_name, command))
 
 # Synchronously execute a shell command.
 # Exits the script with error code 1 if the command exited with a nonzero code.
-def exec_sync(command, before="", error="Something went wrong.", after="Done.",
+def exec_sync(command, before="", error="Something went wrong.", after="",
               capture_out=True, die=True, shell=False):
     if before != "":
         if error: error = " {}".format(error)

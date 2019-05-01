@@ -6,13 +6,13 @@ REMOTE_JOB_ROOT = "/tmp/outsource/jobs/"
 REMOTE_SCRIPT_ROOT = "/tmp/outsource/scripts/"
 
 def run_remote_command(ip, command, capture_out=True):
-    #print("run remote command")
+    #print("run remote command {}".format(command))
     output = exec_sync('ssh {} -o StrictHostKeyChecking=no "{}"'.format(ip, command),
                        capture_out=capture_out, shell=True, after=None)
     return output
 
 def check_remote_program_exists(ip, program):
-    print("remote check program exists")
+    print("remote check program exists {}".format(program))
     remote_command_path = run_remote_command(ip, "command -v {} || true".format(program), capture_out=True)
     print("remote command path: {}".format(remote_command_path))
     return remote_command_path.strip() != ""
