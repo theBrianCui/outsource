@@ -8,6 +8,7 @@ import time
 
 import mail
 import run
+import job
 from az import az_resource_group_exists
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
@@ -18,8 +19,11 @@ RESOURCE_GROUP = "outsource-rgsouth"
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 
 subparsers = parser.add_subparsers(dest='command_name')
-parser_vm = subparsers.add_parser('vm', help='Create, list, modify and delete Outsource VMs.')
-parser_vm.add_argument('--list', dest='vm_list', action='store_true', help='List Outsource VMs and public IP addresses.')
+
+parser_job = subparsers.add_parser('job', help='List, delete, and download data from Outsource jobs.')
+parser_job.add_argument('-l', '--list', dest='job_list', action='store_true', help='List Outsource jobs.')
+parser_job.add_argument('-d', '--download', dest='job_download', nargs=1, help='Download data from a job\'s VM.')
+parser_job.add_argument('-s', '--stop', dest='job_stop', nargs=1, help='Stop a job\'s VM.')
 
 parser_run = subparsers.add_parser('run', help='Outsource a command.')
 parser_run.add_argument('-v', '--vm', dest='run_vm', nargs=1,
@@ -37,9 +41,20 @@ if SUBCOMMAND == None:
     parser.print_help()
     sys.exit(1)
 
-elif SUBCOMMAND == "vm":
-    parser_vm.print_help()
-    sys.exit(1)
+elif SUBCOMMAND == "job":
+    try:
+        if ARGUMENTS.job_list:
+            job.list()
+        elif ARGUMENTS.job_download:
+            job.download(ARGUMENTS.job_download[0])
+        elif ARGUMENTS.job_stop:
+            job.stop(ARGUMENTS.job_stop[0])
+        else:
+            parser_run.print_help()
+    except Exception as e:
+        print(e)
+        parser_run.print_help()
+        sys.exit(1)
 
 elif SUBCOMMAND == "run":
     SEND_EMAIL_ADDRESS = ARGUMENTS.run_email

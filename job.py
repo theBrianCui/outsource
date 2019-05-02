@@ -10,7 +10,7 @@ import mail
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
 
-def run_list():
+def list():
     with open("scripts/jobs", "r") as file:
         print('{:<10}{:<17}{:<10}{}'.format("Task_ID", "Host", "Status", "Command"))
         for line in file:
@@ -19,7 +19,7 @@ def run_list():
             status = "Running" if command in output else "Finished"
             print('{:<10}{:<17}{:<10}{}'.format(task_id, host, status, command), end="")
 
-def run_fetch_data(task_id):
+def download(task_id):
     # Find host that runs given task
     host = ""
     job_name = ""
@@ -31,7 +31,7 @@ def run_fetch_data(task_id):
                 break
 
     # Compress task's directory in VM
-    print("Fetching data for task no. %s!" % (task_id))
+    print("Fetching data from task no. %s!" % (task_id))
     output = sshtools.run_remote_command(host, "tar -C /tmp/outsource/jobs -cvf /tmp/outsource/jobs/task_%s.gz.tar %s" % (task_id, job_name))
 
     # Transfer .zip to host
@@ -39,7 +39,7 @@ def run_fetch_data(task_id):
     print("Successfully downloaded data from task no. %s in task_%s.gz.tar!" % (task_id, task_id))
 
 
-def run_stop(task_id):
+def stop(task_id):
     print("Stopping task no. %s!" % (task_id))
 
     with open("scripts/jobs", "r") as file:
@@ -56,21 +56,3 @@ def run_stop(task_id):
                 file.write(line)
     print("Successfully stopped task no. %s!" % (task_id))
 
-DESCRIPTION = "Outsource is a command line tool for running commands remotely."
-
-parser = argparse.ArgumentParser(description=DESCRIPTION)
-
-parser.add_argument('-l', '--list', help="List active tasks.", action="store_true")
-parser.add_argument('-f', '--fetch-data', nargs=1, help="Fetch data from task.")
-parser.add_argument('-s', '--stop', nargs=1, help="Stop task.")
-
-ARGUMENTS = parser.parse_args()
-
-if ARGUMENTS.list:
-    run_list()
-elif ARGUMENTS.fetch_data:
-    run_fetch_data(ARGUMENTS.fetch_data[0])
-elif ARGUMENTS.stop:
-    run_stop(ARGUMENTS.stop[0])
-else:
-    print("No command")
