@@ -5,7 +5,7 @@ import os
 def print_stdout(completed_process):
     print(completed_process.stdout.decode("utf-8"), end="")
 
-def add_job_to_list(host, command, job_name):
+def add_job_to_list(host, command, job_name, vm_name, resource_group):
     # Get last line and read last task_id
     task_id = -1
     with open("scripts/jobs", "r") as file:
@@ -19,12 +19,12 @@ def add_job_to_list(host, command, job_name):
 
     # Add new task to file
     with open("scripts/jobs", "a") as file:
-        file.write("%d %s %s %s\n" % (task_id, host, job_name, command))
+        file.write("%d %s %s %s %s %s\n" % (task_id, host, job_name, vm_name, resource_group, command))
 
 # Synchronously execute a shell command.
 # Exits the script with error code 1 if the command exited with a nonzero code.
 def exec_sync(command, before="", error="Something went wrong.", after="",
-              capture_out=True, die=True, shell=False):
+              capture_out=True, die=True, shell=False, timeout=None):
     if before != "":
         if error: error = " {}".format(error)
         if after: after = " {}".format(after)

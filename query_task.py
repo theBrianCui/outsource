@@ -14,7 +14,7 @@ def run_list():
     with open("scripts/jobs", "r") as file:
         print('{:<10}{:<17}{:<10}{}'.format("Task_ID", "Host", "Status", "Command"))
         for line in file:
-            (task_id, host, _, command) = line.split(maxsplit=3)
+            (task_id, host, _, _, _, command) = line.split(maxsplit=5)
             output = sshtools.run_remote_command(host, "ps aux")
             status = "Running" if command in output else "Finished"
             print('{:<10}{:<17}{:<10}{}'.format(task_id, host, status, command), end="")
@@ -42,6 +42,19 @@ def run_fetch_data(task_id):
 def run_stop(task_id):
     print("Stopping task no. %s!" % (task_id))
 
+    with open("scripts/jobs", "r") as file:
+        lines = file.readlines()
+
+    with open("scripts/jobs", "w") as file:
+        for line in lines:
+            (t_id, _, _, vm_name, resource_group, _) = line.split(maxsplit=5)
+            if t_id == task_id:
+                exec_sync(["az", "vm", "delete", "-g", resource_group, "-n", vm_name, "--yes"],
+                           "Stopping VM ...",
+                           capture_out=True)
+            else:
+                file.write(line)
+    print("Successfully stopped task no. %s!" % (task_id))
 
 DESCRIPTION = "Outsource is a command line tool for running commands remotely."
 
@@ -49,7 +62,7 @@ parser = argparse.ArgumentParser(description=DESCRIPTION)
 
 parser.add_argument('-l', '--list', help="List active tasks.", action="store_true")
 parser.add_argument('-f', '--fetch-data', nargs=1, help="Fetch data from task.")
-parser.add_argument('-stop', '--stop', nargs=1, help="Stop task.")
+parser.add_argument('-s', '--stop', nargs=1, help="Stop task.")
 
 ARGUMENTS = parser.parse_args()
 
@@ -58,6 +71,6 @@ if ARGUMENTS.list:
 elif ARGUMENTS.fetch_data:
     run_fetch_data(ARGUMENTS.fetch_data[0])
 elif ARGUMENTS.stop:
-    run_fetch_data(ARGUMENTS.stop[0])
+    run_stop(ARGUMENTS.stop[0])
 else:
     print("No command")
