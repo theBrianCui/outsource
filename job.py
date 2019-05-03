@@ -14,7 +14,7 @@ def list():
     with open("scripts/jobs", "r") as file:
         print('{:<10}{:<17}{:<10}{}'.format("Task_ID", "Host", "Status", "Command"))
         for line in file:
-            (task_id, host, _, _, _, command) = line.split(maxsplit=5)
+            (task_id, host, _, _, _, _, command) = line.split(maxsplit=6)
             output = sshtools.run_remote_command(host, "ps aux")
             status = "Running" if command in output else "Finished"
             print('{:<10}{:<17}{:<10}{}'.format(task_id, host, status, command), end="")
@@ -38,7 +38,6 @@ def download(task_id):
     process = subprocess.Popen("scp %s:/tmp/outsource/jobs/task_%s.gz.tar task_%s.gz.tar" % (host, task_id, task_id), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print("Successfully downloaded data from task no. %s in task_%s.gz.tar!" % (task_id, task_id))
 
-
 def stop(task_id):
     print("Stopping task no. %s!" % (task_id))
 
@@ -47,11 +46,9 @@ def stop(task_id):
 
     with open("scripts/jobs", "w") as file:
         for line in lines:
-            (t_id, _, _, vm_name, resource_group, _) = line.split(maxsplit=5)
+            (t_id, host, _, pid, _) = line.split(maxsplit=4)
             if t_id == task_id:
-                exec_sync(["az", "vm", "delete", "-g", resource_group, "-n", vm_name, "--yes"],
-                           "Stopping VM ...",
-                           capture_out=True)
+                sshtools.run_remote_command(host, "kill %s" % pid)
             else:
                 file.write(line)
     print("Successfully stopped task no. %s!" % (task_id))

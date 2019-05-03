@@ -7,7 +7,7 @@ REMOTE_SCRIPT_ROOT = "/tmp/outsource/scripts/"
 
 def run_remote_command(ip, command, capture_out=True):
     #print("run remote command {}".format(command))
-    output = exec_sync('ssh {} -o StrictHostKeyChecking=no "{}"'.format(ip, command),
+    output = exec_sync('ssh {} -o StrictHostKeyChecking=no "{} & echo $!"'.format(ip, command),
                        capture_out=capture_out, shell=True, after=None)
     return output
 

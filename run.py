@@ -70,22 +70,8 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
             print("Found local file dependency: {}".format(arg))
             sshtools.upload_job_file(arg, vm_ip, job_name)
 
-    sshtools.run_remote_script(nohup_script_name, vm_ip)
+    pid = sshtools.run_remote_script(nohup_script_name, vm_ip)
+    pid = pid[1:-1]
     print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
-
-    add_job_to_list(vm_ip, ARGUMENT_STRING_FULL, job_name, virtual_machine, resource_group)
-
-    # command = "python -m SimpleHTTPServer 8000"
-
-    # sshtools.upload_file("monitor.py", ip, "/tmp/outsource/scripts/")
-    # sshtools.run_remote_command(ip, "python /tmp/outsource/scripts/monitor.py " + command, capture_out=True)
-
-    # i = 1
-    # while True:
-    #      time.sleep(5)
-    #      process = subprocess.Popen("ssh %s -o StrictHostKeyChecking=no cat /tmp/logs" % (ip), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #      output,stderr = process.communicate()
-    #      status = process.poll()
-    #      print("Polling %d:" % (i))
-    #      print(output)
-    #      i += 1
+    
+    add_job_to_list(vm_ip, ARGUMENT_STRING_FULL, job_name, pid, virtual_machine, resource_group)
