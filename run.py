@@ -46,13 +46,9 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
 
     print("{} IP: {}".format(virtual_machine, vm_ip))
 
-    if email:
-        try:
-            sshtools.run_remote_script(email.create_email_script(email), vm_ip)
-        except Exception as e:
-            print("Could not set up email: {}".format(e))
+    job_name, program_script_path, nohup_script_name, remote_log_name = sshtools.create_job(ARGUMENT_STRING_FULL, email)
 
-    job_name, nohup_script_name, remote_log_name = sshtools.create_job(ARGUMENT_STRING_FULL)
+    print("Job: {}".format(job_name))
 
     # install dependencies
     if not sshtools.check_remote_program_exists(vm_ip, ARGUMENT_PROGRAM):
@@ -70,6 +66,8 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
             print("Found local file dependency: {}".format(arg))
             sshtools.upload_job_file(arg, vm_ip, job_name)
 
+    sshtools.upload_script(program_script_path, vm_ip)
+    sshtools.upload_script(nohup_script_name, vm_ip)
     sshtools.run_remote_script(nohup_script_name, vm_ip)
     print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
 
