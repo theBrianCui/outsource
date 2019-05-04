@@ -23,11 +23,14 @@ def list():
     print(tabulate.tabulate(vm_table, headers="firstrow"))
 
 def delete(vm_name, resource_group):
-    print("Stopping VM %s" % vm_name)
-    exec_sync(["az", "vm", "delete", "-g", resource_group, "-n", vm_name, "--yes"],
-               "Stopping VM ...",
-               capture_out=True)
-    print("Successfully stopped VM %s!" % vm_name)
+    if az.is_vm_active(vm_name, resource_group):
+        print("Stopping VM %s" % vm_name)
+        exec_sync(["az", "vm", "delete", "-g", resource_group, "-n", vm_name, "--yes"],
+                   "Stopping VM ...",
+                   capture_out=True)
+        print("Successfully stopped VM %s!" % vm_name)
+    else:
+        print("VM %s isn't currently active." % vm_name)
 
 def create(vm_name, resource_group):
     az.az_resource_group_exists(resource_group, silent=False)

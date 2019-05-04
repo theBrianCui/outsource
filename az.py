@@ -73,3 +73,23 @@ def az_create_vm(resource_group, name, hardware="Standard_DS1_v2", silent=False)
                 capture_out=True)
 
     return az_vm_get_ip(resource_group, name)
+
+def is_json(s):
+    try:
+        json_object = json.loads(s)
+    except Exception as e:
+        return False
+    return True
+
+def is_vm_active(vm_name, resource_group):
+    try:
+        vm_data = exec_sync(("az vm get-instance-view --name %s --resource-group %s" % (vm_name, resource_group)).split(" "),
+            capture_out=True, die=True)
+    except Exception as e:
+        return False
+
+    if is_json(vm_data):
+        vm = json.loads(vm_data)
+        return (vm["provisioningState"] == "Succeeded")
+    else:
+        return False

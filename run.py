@@ -71,5 +71,6 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
     script_pid = sshtools.run_remote_script(nohup_script_name, vm_ip)[1:-1]
     print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
     command_pid = sshtools.run_remote_command(vm_ip, "pgrep -P %s" % script_pid)[1:-1]
+    command_pid = "-1" if command_pid == "" else command_pid
 
     add_job_to_list(vm_ip, ARGUMENT_STRING_FULL, job_name, command_pid, virtual_machine, resource_group)
