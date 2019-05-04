@@ -9,6 +9,7 @@ import time
 import mail
 import run
 import job
+import vm
 from az import az_resource_group_exists
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
@@ -25,6 +26,11 @@ parser_job.add_argument('-l', '--list', dest='job_list', action='store_true', he
 parser_job.add_argument('-d', '--download', dest='job_download', nargs=1, help='Download data from a job\'s VM.')
 parser_job.add_argument('-sl', '--show-logs', dest='job_logs', nargs=1, help='Show logs of a job.')
 parser_job.add_argument('-s', '--stop', dest='job_stop', nargs=1, help='Stop a job\'s VM.')
+
+parser_vm = subparsers.add_parser('vm', help='Create, list, and delete Outsource VMs.')
+parser_vm.add_argument('-c', '--create', dest='vm_create', nargs=1, help='Create a VM.')
+parser_vm.add_argument('-d', '--delete', dest='vm_delete', nargs=1, help='Delete a VM.')
+parser_vm.add_argument('-l', '--list', dest='vm_list', action='store_true', help='List VMs and public IP addresses.')
 
 parser_run = subparsers.add_parser('run', help='Outsource a command.')
 parser_run.add_argument('-v', '--vm', dest='run_vm', nargs=1,
@@ -54,6 +60,21 @@ elif SUBCOMMAND == "job":
             job.stop(ARGUMENTS.job_stop[0])
         elif ARGUMENTS.job_logs:
             job.show_logs(ARGUMENTS.job_logs[0])
+        else:
+            parser_run.print_help()
+    except Exception as e:
+        print(e)
+        parser_run.print_help()
+        sys.exit(1)
+
+elif SUBCOMMAND == "vm":
+    try:
+        if ARGUMENTS.vm_list:
+            vm.list()
+        elif ARGUMENTS.vm_delete:
+            vm.delete(ARGUMENTS.vm_delete[0])
+        elif ARGUMENTS.vm_create:
+            vm.create(ARGUMENTS.vm_create[0])
         else:
             parser_run.print_help()
     except Exception as e:
