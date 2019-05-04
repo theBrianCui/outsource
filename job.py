@@ -9,15 +9,17 @@ import sshtools
 import mail
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
+import tabulate
 
 def list():
     with open("scripts/jobs", "r") as file:
-        print('{:<10}{:<17}{:<10}{}'.format("Task_ID", "Host", "Status", "Command"))
+        jobs_table =[["Task_ID", "Host", "Status", "Command"]]
         for line in file:
             (task_id, host, _, _, _, _, command) = line.split(maxsplit=6)
             output = sshtools.run_remote_command(host, "ps aux")
             status = "Running" if command in output else "Finished"
-            print('{:<10}{:<17}{:<10}{}'.format(task_id, host, status, command), end="")
+            jobs_table.append([task_id, host, status, command])
+        print(tabulate.tabulate(jobs_table, headers="firstrow"))
 
 def download(task_id):
     # Find host that runs given task
