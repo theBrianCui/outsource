@@ -1,9 +1,11 @@
 import os
 from utils import exec_sync, read_file_to_string, write_string_to_file
 import time
+import mail
 
 REMOTE_JOB_ROOT = "/tmp/outsource/jobs/"
 REMOTE_SCRIPT_ROOT = "/tmp/outsource/scripts/"
+REMOTE_LOG_ROOT = "/tmp/outsource/logs/"
 
 def run_remote_command(ip, command, capture_out=True):
     #print("run remote command {}".format(command))
@@ -55,7 +57,8 @@ def run_remote_script(script_path, ip, capture_out=True):
     remote_script_path = upload_script(script_path, ip)
     return run_remote_command(ip, "bash " + remote_script_path, capture_out=capture_out)
 
-def create_job(command):
+def create_job(command, email=""):
+    print("creating job")
     program_name = command.split(" ")[0]
     job_name = "{}_{}".format(program_name, int(time.time()))
 
@@ -63,10 +66,26 @@ def create_job(command):
     temp_script_path = "scripts/" + temp_script_name
     temp_log_name = job_name + ".log"
 
+    print("name: {}".format(job_name))
+    program_script_name = job_name + ".job.sh"
+    program_script_path = "scripts/" + program_script_name
+    program_script = "{} > {} 2>&1\n".format(command, REMOTE_LOG_ROOT + temp_log_name)
+
+    if email:
+        print("Preparing email script, recipient " + email)
+        try:
+            mail_script = mail.create_email_script(job_name, REMOTE_LOG_ROOT + temp_log_name, email)
+            program_script += read_file_to_string(mail_script)
+        except Exception as e:
+            print("Could not configure email: " + e)
+
     nohup_script = read_file_to_string("scripts/nohup.sh")
     nohup_script = nohup_script.replace("JOB_NAME", job_name)
-    nohup_script = nohup_script.replace("COMMAND_NAME", command)
+    nohup_script = nohup_script.replace("COMMAND_NAME", "bash {}".format(
+        REMOTE_SCRIPT_ROOT + program_script_name))
     nohup_script = nohup_script.replace("LOG_NAME", temp_log_name)
 
+    print("writing jobs to file")
+    write_string_to_file(program_script, program_script_path)
     write_string_to_file(nohup_script, temp_script_path)
-    return job_name, temp_script_path, temp_log_name
+    return job_name, program_script_path, temp_script_path, temp_log_name

@@ -29,12 +29,14 @@ parser_run = subparsers.add_parser('run', help='Outsource a command.')
 parser_run.add_argument('-v', '--vm', dest='run_vm', nargs=1,
     help="Run the job on a specific VM. The VM will be created if it does not exist.",
     default=["outsource-vm"])
-parser_run.add_argument('-e', '--email', dest='run_email', nargs=1, help="Send an email to the specified address when the job completes.")
+parser_run.add_argument('-e', '--email', dest='run_email', nargs=1,
+    help="Send an email to the specified address when the job completes.",
+    default=[""])
 parser_run.add_argument('-p', '--ports', dest='run_ports', action='store_true', help="Open all inbound ports to the VM.")
 parser_run.add_argument('COMMAND', nargs=argparse.REMAINDER, help="COMMAND")
 
 ARGUMENTS = parser.parse_args()
-# print(ARGUMENTS)
+print(ARGUMENTS)
 SUBCOMMAND = ARGUMENTS.command_name
 
 if SUBCOMMAND == None:
@@ -57,7 +59,7 @@ elif SUBCOMMAND == "job":
         sys.exit(1)
 
 elif SUBCOMMAND == "run":
-    SEND_EMAIL_ADDRESS = ARGUMENTS.run_email
+    SEND_EMAIL_ADDRESS = ARGUMENTS.run_email[0]
     VIRTUAL_MACHINE = ARGUMENTS.run_vm[0]
     OPEN_PORTS = ARGUMENTS.run_ports
 
