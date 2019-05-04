@@ -32,10 +32,12 @@ def download(task_id):
 
     # Compress task's directory in VM
     print("Fetching data from task no. %s!" % (task_id))
-    output = sshtools.run_remote_command(host, "tar -C /tmp/outsource/jobs -cvf /tmp/outsource/jobs/task_%s.gz.tar %s" % (task_id, job_name))
+    output = sshtools.run_remote_command(host,
+        "tar -C /tmp/outsource/jobs -cvf /tmp/outsource/jobs/task_%s.gz.tar %s" % (task_id, job_name))
 
     # Transfer .zip to host
-    process = subprocess.Popen("scp %s:/tmp/outsource/jobs/task_%s.gz.tar task_%s.gz.tar" % (host, task_id, task_id), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    process = subprocess.Popen("scp %s:/tmp/outsource/jobs/task_%s.gz.tar task_%s.gz.tar" %
+        (host, task_id, task_id), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print("Successfully downloaded data from task no. %s in task_%s.gz.tar!" % (task_id, task_id))
 
 def stop(task_id):
@@ -52,4 +54,20 @@ def stop(task_id):
             else:
                 file.write(line)
     print("Successfully stopped task no. %s!" % (task_id))
+
+def show_logs(task_id):
+    # Find host that runs given task
+    host = ""
+    job_name = ""
+    with open("scripts/jobs", "r") as file:
+        for line in file:
+            (t_id, h, job_name, _) = line.split(maxsplit=3)
+            if t_id == task_id:
+                host = h
+                break
+
+    # Transfer log file to host
+    process = subprocess.Popen("scp %s:/tmp/outsource/logs/%s.log task_%s.log" %
+        (host, job_name, task_id), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print("Successfully downloaded logs from task no. %s in task_%s.log!" % (task_id, task_id))
 

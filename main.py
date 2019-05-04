@@ -23,6 +23,7 @@ subparsers = parser.add_subparsers(dest='command_name')
 parser_job = subparsers.add_parser('job', help='List, delete, and download data from Outsource jobs.')
 parser_job.add_argument('-l', '--list', dest='job_list', action='store_true', help='List Outsource jobs.')
 parser_job.add_argument('-d', '--download', dest='job_download', nargs=1, help='Download data from a job\'s VM.')
+parser_job.add_argument('-sl', '--show-logs', dest='job_logs', nargs=1, help='Show logs of a job.')
 parser_job.add_argument('-s', '--stop', dest='job_stop', nargs=1, help='Stop a job\'s VM.')
 
 parser_run = subparsers.add_parser('run', help='Outsource a command.')
@@ -51,6 +52,8 @@ elif SUBCOMMAND == "job":
             job.download(ARGUMENTS.job_download[0])
         elif ARGUMENTS.job_stop:
             job.stop(ARGUMENTS.job_stop[0])
+        elif ARGUMENTS.job_logs:
+            job.show_logs(ARGUMENTS.job_logs[0])
         else:
             parser_run.print_help()
     except Exception as e:
