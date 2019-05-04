@@ -28,8 +28,8 @@ parser_job.add_argument('-sl', '--show-logs', dest='job_logs', nargs=1, help='Sh
 parser_job.add_argument('-s', '--stop', dest='job_stop', nargs=1, help='Stop a job\'s VM.')
 
 parser_vm = subparsers.add_parser('vm', help='Create, list, and delete Outsource VMs.')
-parser_vm.add_argument('-c', '--create', dest='vm_create', nargs=1, help='Create a VM.')
-parser_vm.add_argument('-d', '--delete', dest='vm_delete', nargs=1, help='Delete a VM.')
+parser_vm.add_argument('-c', '--create', dest='vm_create', nargs=2, help='Create a VM [provide: 1) VM name, 2) resource group].')
+parser_vm.add_argument('-d', '--delete', dest='vm_delete', nargs=2, help='Delete a VM [provide: 1) VM name, 2) resource group].')
 parser_vm.add_argument('-l', '--list', dest='vm_list', action='store_true', help='List VMs and public IP addresses.')
 
 parser_run = subparsers.add_parser('run', help='Outsource a command.')
@@ -72,9 +72,9 @@ elif SUBCOMMAND == "vm":
         if ARGUMENTS.vm_list:
             vm.list()
         elif ARGUMENTS.vm_delete:
-            vm.delete(ARGUMENTS.vm_delete[0])
+            vm.delete(ARGUMENTS.vm_delete[0], ARGUMENTS.vm_delete[1])
         elif ARGUMENTS.vm_create:
-            vm.create(ARGUMENTS.vm_create[0])
+            vm.create(ARGUMENTS.vm_create[0], ARGUMENTS.vm_create[1])
         else:
             parser_run.print_help()
     except Exception as e:
