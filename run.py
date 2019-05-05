@@ -53,10 +53,8 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
     # install dependencies
     if not sshtools.check_remote_program_exists(vm_ip, ARGUMENT_PROGRAM):
         print("{} does not exist on the remote machine.".format(ARGUMENT_PROGRAM))
-        print("Attempting install via apt-get...")
-        if not sshtools.remote_apt_get_program(vm_ip, ARGUMENT_PROGRAM):
-            print("Could not install {} via apt-get.".format(ARGUMENT_PROGRAM))
-            sys.exit(0)
+        if not sshtools.remote_install_program(vm_ip, ARGUMENT_PROGRAM):
+            raise RuntimeError("Could not remotely install {}.".format(ARGUMENT_PROGRAM))
 
     print("{} program exists".format(ARGUMENT_PROGRAM))
 

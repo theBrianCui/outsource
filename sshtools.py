@@ -19,6 +19,21 @@ def check_remote_program_exists(ip, program):
     print("remote command path: {}".format(remote_command_path))
     return remote_command_path.strip() != ""
 
+def remote_install_program(ip, program):
+    print("Attempting to install {}...".format(program))
+
+    try:
+        if program == "node" or program == "nodejs":
+            print("Installing nodejs from official nodesource repository...")
+            run_remote_command(ip, "curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -")
+            run_remote_command(ip, "sudo apt-get install -y nodejs")
+        else:
+            remote_apt_get_program(ip, program)
+    except Exception:
+        pass
+
+    return check_remote_program_exists(ip, program)
+
 def remote_apt_get_program(ip, program):
     print("remote apt get")
     try:
@@ -28,9 +43,10 @@ def remote_apt_get_program(ip, program):
     return check_remote_program_exists(ip, program)
 
 def get_local_user():
-    print("get local user")
-    current_user = exec_sync(["whoami"], "", "", "")
-    return current_user.strip()
+    if not get_local_user.user:
+        get_local_user.user = exec_sync(["whoami"], "", "", "").strip()
+    return get_local_user.user
+get_local_user.user = ""
 
 def upload_file(local_path, ip, dest_path):
     print("upload file")
