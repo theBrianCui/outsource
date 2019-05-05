@@ -61,10 +61,10 @@ elif SUBCOMMAND == "job":
         elif ARGUMENTS.job_logs:
             job.show_logs(ARGUMENTS.job_logs[0])
         else:
-            parser_run.print_help()
+            parser_job.print_help()
     except Exception as e:
         print(e)
-        parser_run.print_help()
+        parser_job.print_help()
         sys.exit(1)
 
 elif SUBCOMMAND == "vm":
@@ -76,10 +76,10 @@ elif SUBCOMMAND == "vm":
         elif ARGUMENTS.vm_create:
             vm.create(ARGUMENTS.vm_create[0], ARGUMENTS.vm_create[1])
         else:
-            parser_run.print_help()
+            parser_vm.print_help()
     except Exception as e:
         print(e)
-        parser_run.print_help()
+        parser_vm.print_help()
         sys.exit(1)
 
 elif SUBCOMMAND == "run":
