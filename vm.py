@@ -13,12 +13,11 @@ import az
 import tabulate
 
 def list():
-    vm_list = exec_sync("az vm list -d".split(" "), capture_out=True, die=True)
-    vm_array = json.loads(vm_list)
-    vm_table = [["VM Name", "Resource Group", "Public IP Address"]]
+    vm_array = az.az_vm_list()
+    vm_table = [["VM Name", "Resource Group", "Hardware", "Public IP Address"]]
 
     for vm in vm_array:
-        vm_table.append([vm["name"], vm["resourceGroup"], vm["publicIps"]])
+        vm_table.append([vm["name"], vm["resourceGroup"], vm["hardware"], vm["ip"]])
 
     print(tabulate.tabulate(vm_table, headers="firstrow"))
 

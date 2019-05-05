@@ -25,7 +25,7 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
     if not az.az_resource_group_exists(resource_group, create=True, silent=False):
         raise RuntimeError("FATAL: Could not create resource group {}".format(resource_group))
 
-    vm_list = az.az_vm_list(resource_group)
+    vm_list = az.az_vm_list(resource_group=resource_group)
     vm_exists = False
     vm_ip = ""
     for vm in vm_list:
