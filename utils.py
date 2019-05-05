@@ -6,8 +6,13 @@ def print_stdout(completed_process):
     print(completed_process.stdout.decode("utf-8"), end="")
 
 def add_job_to_list(host, command, job_name, pid, vm_name, resource_group):
+    # create the jobs file if it does not exist
+    with open('scripts/jobs', 'a+') as file:
+        pass
+
     # Get last line and read last task_id
     task_id = -1
+
     with open("scripts/jobs", "r") as file:
         lines = file.readlines()
         if len(lines) == 0:
