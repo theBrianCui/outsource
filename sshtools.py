@@ -48,12 +48,20 @@ def get_local_user():
     return get_local_user.user
 get_local_user.user = ""
 
+def get_working_directory():
+    return exec_sync(["pwd"], "", "", "").strip()
+
 def upload_file(local_path, ip, dest_path):
     print("upload file")
     dirname = os.path.dirname(dest_path)
     run_remote_command(ip, "mkdir -p {}".format(dirname))
-    exec_sync("scp -r {} {}@{}:{}".format(local_path, get_local_user(), ip, dest_path),
+    exec_sync("scp -rp {} {}@{}:{}".format(local_path, get_local_user(), ip, dest_path),
               capture_out=False, shell=True)
+
+def upload_working_directory(ip, jobname):
+    print("upload working directory")
+    exec_sync("rsync -avP {}/ {}@{}:{}{}/".format(get_working_directory(), get_local_user(), ip, REMOTE_JOB_ROOT, jobname),
+            capture_out=False, shell=True)
 
 def upload_job_file(local_path, ip, jobname):
     print("upload job file")
