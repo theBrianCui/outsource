@@ -8,15 +8,15 @@ import shlex
 import sshtools
 import mail
 from utils import (delete_file, exec_sync, get_env, read_file_to_string,
-                   write_string_to_file)
+                   write_string_to_file, get_scripts_folder)
 from az import is_vm_active
 import tabulate
 
 def list():
-    with open("scripts/jobs", "r") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "r") as file:
         lines = file.readlines()
 
-    with open("scripts/jobs", "w") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "w") as file:
         jobs_table =[["Task ID", "IP Address", "VM Name", "Status", "Command"]]
         for line in lines:
             (task_id, host, _, _, vm_name, resource_group, command) = line.split(maxsplit=6)
@@ -34,7 +34,7 @@ def download(task_id):
     job_name = ""
     vm_name = ""
     resource_group = ""
-    with open("scripts/jobs", "r") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "r") as file:
         for line in file:
             (t_id, h, job_name, _, vm_name, resource_group, _) = line.split(maxsplit=6)
             if t_id == task_id:
@@ -62,12 +62,12 @@ def download(task_id):
         return
 
 def stop(task_id):
-    with open("scripts/jobs", "r") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "r") as file:
         lines = file.readlines()
 
     stopped_task = False
 
-    with open("scripts/jobs", "w") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "w") as file:
         for line in lines:
             (t_id, host, _, pid, vm_name, resource_group, _) = line.split(maxsplit=6)
             if t_id == task_id and is_vm_active(vm_name, resource_group):
@@ -89,7 +89,7 @@ def show_logs(task_id):
     vm_name = ""
     resource_group = ""
 
-    with open("scripts/jobs", "r") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "r") as file:
         for line in file:
             (t_id, h, job_name, pid, vm_name, resource_group, _) = line.split(maxsplit=6)
             if t_id == task_id:

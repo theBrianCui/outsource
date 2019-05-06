@@ -1,6 +1,6 @@
-from utils import read_file_to_string, get_env, write_string_to_file
+from utils import read_file_to_string, get_env, write_string_to_file, get_scripts_folder
 
-SEND_EMAIL_SCRIPT = "scripts/email"
+SEND_EMAIL_SCRIPT = "{}/email".format(get_scripts_folder())
 SENDGRID_API_KEY_ENV = "SENDGRID_API_KEY"
 
 def create_email_script(job_name, body_file_path, recipient):

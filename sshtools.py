@@ -1,5 +1,5 @@
 import os
-from utils import exec_sync, read_file_to_string, write_string_to_file
+from utils import exec_sync, read_file_to_string, write_string_to_file, get_scripts_folder
 import time
 import mail
 
@@ -87,12 +87,12 @@ def create_job(command, email=""):
     job_name = "{}_{}".format(program_name, int(time.time()))
 
     temp_script_name = job_name + ".job"
-    temp_script_path = "scripts/" + temp_script_name
+    temp_script_path = "{}/{}".format(get_scripts_folder(), temp_script_name)
     temp_log_name = job_name + ".log"
 
     print("name: {}".format(job_name))
     program_script_name = job_name + ".job.sh"
-    program_script_path = "scripts/" + program_script_name
+    program_script_path = "{}/{}".format(get_scripts_folder(), program_script_name)
     program_script = "{} > {} 2>&1\n".format(command, REMOTE_LOG_ROOT + temp_log_name)
 
     if email:
@@ -103,7 +103,7 @@ def create_job(command, email=""):
         except Exception as e:
             print("Could not configure email: " + e)
 
-    nohup_script = read_file_to_string("scripts/nohup.sh")
+    nohup_script = read_file_to_string("{}/nohup.sh".format(get_scripts_folder()))
     nohup_script = nohup_script.replace("JOB_NAME", job_name)
     nohup_script = nohup_script.replace("COMMAND_NAME", "bash {}".format(
         REMOTE_SCRIPT_ROOT + program_script_name))

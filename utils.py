@@ -1,19 +1,23 @@
 import sys
 import subprocess
 import os
+import sys
+
+def get_scripts_folder():
+    return "{}/scripts".format(sys.path[0])
 
 def print_stdout(completed_process):
     print(completed_process.stdout.decode("utf-8"), end="")
 
 def add_job_to_list(host, command, job_name, pid, vm_name, resource_group):
     # create the jobs file if it does not exist
-    with open('scripts/jobs', 'a+') as file:
+    with open('{}/jobs'.format(get_scripts_folder()), 'a+') as file:
         pass
 
     # Get last line and read last task_id
     task_id = -1
 
-    with open("scripts/jobs", "r") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "r") as file:
         lines = file.readlines()
         if len(lines) == 0:
             task_id = 1
@@ -23,7 +27,7 @@ def add_job_to_list(host, command, job_name, pid, vm_name, resource_group):
             task_id = int(task_id) + 1
 
     # Add new task to file
-    with open("scripts/jobs", "a") as file:
+    with open('{}/jobs'.format(get_scripts_folder()), "a") as file:
         file.write("%d %s %s %s %s %s %s\n" % (task_id, host, job_name, pid, vm_name, resource_group, command))
 
 # Synchronously execute a shell command.
