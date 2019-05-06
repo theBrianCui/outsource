@@ -7,7 +7,7 @@ import az
 from utils import exec_sync, add_job_to_list
 import sshtools
 
-def outsource(arguments, resource_group, virtual_machine, open_ports=False, email=""):
+def outsource(arguments, resource_group, virtual_machine, upload_working_dir=False, open_ports=False, email=""):
     ARGUMENT_ARRAY = tuple(arguments)
     ARGUMENT_PROGRAM = ""               # the base program, e.g. cowsay
     ARGUMENT_STRING_FULL = ""           # the full argument string, e.g. cowsay hello world
@@ -59,10 +59,13 @@ def outsource(arguments, resource_group, virtual_machine, open_ports=False, emai
     print("{} program exists".format(ARGUMENT_PROGRAM))
 
     # search for local file dependencies in the command line
-    for arg in ARGUMENT_ARRAY:
-        if os.path.exists(arg) and os.path.isfile(arg):
-            print("Found local file dependency: {}".format(arg))
-            sshtools.upload_job_file(arg, vm_ip, job_name)
+    if upload_working_dir:
+        sshtools.upload_working_directory(vm_ip, job_name)
+    else:
+        for arg in ARGUMENT_ARRAY:
+            if os.path.exists(arg) and os.path.isfile(arg):
+                print("Found local file dependency: {}".format(arg))
+                sshtools.upload_job_file(arg, vm_ip, job_name)
 
     sshtools.upload_script(program_script_path, vm_ip)
     sshtools.upload_script(nohup_script_name, vm_ip)

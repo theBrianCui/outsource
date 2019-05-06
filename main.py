@@ -40,6 +40,7 @@ parser_run.add_argument('-e', '--email', dest='run_email', nargs=1,
     help="Send an email to the specified address when the job completes.",
     default=[""])
 parser_run.add_argument('-p', '--ports', dest='run_ports', action='store_true', help="Open all inbound ports to the VM.")
+parser_run.add_argument('-w', '--upload-working-dir', dest='run_upload_working_dir', action='store_true', help='Upload the current working directory to the job working directory.')
 parser_run.add_argument('COMMAND', nargs=argparse.REMAINDER, help="COMMAND")
 
 ARGUMENTS = parser.parse_args()
@@ -86,13 +87,14 @@ elif SUBCOMMAND == "run":
     SEND_EMAIL_ADDRESS = ARGUMENTS.run_email[0]
     VIRTUAL_MACHINE = ARGUMENTS.run_vm[0]
     OPEN_PORTS = ARGUMENTS.run_ports
+    UPLOAD_WORKING_DIR = ARGUMENTS.run_upload_working_dir
 
     if not ARGUMENTS.COMMAND or len(ARGUMENTS.COMMAND) == 0:
         parser_run.print_help()
         sys.exit(1)
 
     try:
-        run.outsource(ARGUMENTS.COMMAND, RESOURCE_GROUP, VIRTUAL_MACHINE, OPEN_PORTS, SEND_EMAIL_ADDRESS)
+        run.outsource(ARGUMENTS.COMMAND, RESOURCE_GROUP, VIRTUAL_MACHINE, UPLOAD_WORKING_DIR, OPEN_PORTS, SEND_EMAIL_ADDRESS)
     except Exception as e:
         print(e)
         parser_run.print_help()
