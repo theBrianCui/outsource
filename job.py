@@ -51,12 +51,12 @@ def download(task_id):
         # Compress task's directory in VM
         print("Fetching data from task no. %s!" % (task_id))
         output = sshtools.run_remote_command(host,
-            "tar -C /tmp/outsource/jobs -cvf /tmp/outsource/jobs/task_%s.gz.tar %s" % (task_id, job_name))
+            "tar -C /tmp/outsource/jobs -cvf /tmp/outsource/jobs/task_%s.tar.gz %s" % (task_id, job_name))
 
         # Transfer .zip to host
-        process = subprocess.Popen("scp %s:/tmp/outsource/jobs/task_%s.gz.tar task_%s.gz.tar" %
+        process = subprocess.Popen("scp %s:/tmp/outsource/jobs/task_%s.tar.gz task_%s.tar.gz" %
             (host, task_id, task_id), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print("Successfully downloaded data from task no. %s in task_%s.gz.tar!" % (task_id, task_id))
+        print("Successfully downloaded data from task no. %s in task_%s.tar.gz!" % (task_id, task_id))
     else:
         print("Couldn't download task's data: VM is no longer active.")
         return
