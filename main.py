@@ -15,7 +15,7 @@ from utils import (delete_file, exec_sync, get_env, read_file_to_string,
                    write_string_to_file)
 
 DESCRIPTION = "Outsource is a command line tool for running commands remotely."
-RESOURCE_GROUP = "outsource-rgsouth"
+RESOURCE_GROUP = os.getenv('OUTSOURCE_RESOURCE_GROUP', "outsource-rgsouth")
 
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 
@@ -44,7 +44,7 @@ parser_run.add_argument('-w', '--upload-working-dir', dest='run_upload_working_d
 parser_run.add_argument('COMMAND', nargs=argparse.REMAINDER, help="COMMAND")
 
 ARGUMENTS = parser.parse_args()
-print(ARGUMENTS)
+# print(ARGUMENTS)
 SUBCOMMAND = ARGUMENTS.command_name
 
 if SUBCOMMAND == None:
