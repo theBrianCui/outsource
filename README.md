@@ -21,6 +21,11 @@ The easiest way to use outsource is by creating an alias to run the `main.py` sc
 alias outsource="python3 ~/workspace/outsource/main.py"
 ```
 
+To get email notifications, you will need a [SendGrid API key](https://sendgrid.com/). SendGrid offers a free email sending for up to 100 emails/day. The key is read from the `SENDGRID_API_KEY` environmental variable; you can assign one like so.
+
+```
+export SENDGRID_API_KEY='1234ABCD'
+```
 ## Examples
 
 ### Hello World
