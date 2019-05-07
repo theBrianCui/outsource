@@ -44,7 +44,7 @@ parser_run.add_argument('-w', '--upload-working-dir', dest='run_upload_working_d
 parser_run.add_argument('COMMAND', nargs=argparse.REMAINDER, help="COMMAND")
 
 ARGUMENTS = parser.parse_args()
-print(ARGUMENTS)
+# print(ARGUMENTS)
 SUBCOMMAND = ARGUMENTS.command_name
 
 if SUBCOMMAND == None:

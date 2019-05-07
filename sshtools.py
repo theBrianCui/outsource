@@ -14,9 +14,8 @@ def run_remote_command(ip, command, capture_out=True):
     return output
 
 def check_remote_program_exists(ip, program):
-    print("remote check program exists {}".format(program))
     remote_command_path = run_remote_command(ip, "command -v {} || true".format(program), capture_out=True)
-    print("remote command path: {}".format(remote_command_path))
+    # print("Remote command path: {}".format(remote_command_path))
     return remote_command_path.strip() != ""
 
 def remote_install_program(ip, program):
@@ -35,7 +34,7 @@ def remote_install_program(ip, program):
     return check_remote_program_exists(ip, program)
 
 def remote_apt_get_program(ip, program):
-    print("remote apt get")
+    print("Attepting to install {} using apt-get...".format(program))
     try:
         run_remote_command(ip, "sudo apt-get install -y {}".format(program))
     except Exception:
@@ -52,37 +51,32 @@ def get_working_directory():
     return exec_sync(["pwd"], "", "", "").strip()
 
 def upload_file(local_path, ip, dest_path):
-    print("upload file")
     dirname = os.path.dirname(dest_path)
     run_remote_command(ip, "mkdir -p {}".format(dirname))
     exec_sync("scp -rp {} {}@{}:{}".format(local_path, get_local_user(), ip, dest_path),
               capture_out=False, shell=True)
 
 def upload_working_directory(ip, jobname):
-    print("upload working directory")
+    print("Uploading working directory...")
     exec_sync("rsync -avP {}/ {}@{}:{}{}/".format(get_working_directory(), get_local_user(), ip, REMOTE_JOB_ROOT, jobname),
             capture_out=False, shell=True)
 
 def upload_job_file(local_path, ip, jobname):
-    print("upload job file")
     dirname = "{}{}/".format(REMOTE_JOB_ROOT, jobname)
     filename = os.path.basename(local_path)
     upload_file(local_path, ip, dirname + filename)
 
 def upload_script(script_path, ip):
-    print("upload script")
     basename = os.path.basename(script_path)
     remote_script_path = "{}{}".format(REMOTE_SCRIPT_ROOT, basename)
     upload_file(script_path, ip, remote_script_path)
     return remote_script_path
 
 def run_remote_script(script_path, ip, capture_out=True):
-    print("run remote script")
     remote_script_path = upload_script(script_path, ip)
     return run_remote_command(ip, "bash " + remote_script_path, capture_out=capture_out)
 
 def create_job(command, email=""):
-    print("creating job")
     program_name = command.split(" ")[0]
     job_name = "{}_{}".format(program_name, int(time.time()))
 
@@ -90,7 +84,7 @@ def create_job(command, email=""):
     temp_script_path = "{}/{}".format(get_scripts_folder(), temp_script_name)
     temp_log_name = job_name + ".log"
 
-    print("name: {}".format(job_name))
+    print("New job name: {}".format(job_name))
     program_script_name = job_name + ".job.sh"
     program_script_path = "{}/{}".format(get_scripts_folder(), program_script_name)
     program_script = "{} > {} 2>&1\n".format(command, REMOTE_LOG_ROOT + temp_log_name)
@@ -109,7 +103,6 @@ def create_job(command, email=""):
         REMOTE_SCRIPT_ROOT + program_script_name))
     nohup_script = nohup_script.replace("LOG_NAME", temp_log_name)
 
-    print("writing jobs to file")
     write_string_to_file(program_script, program_script_path)
     write_string_to_file(nohup_script, temp_script_path)
     return job_name, program_script_path, temp_script_path, temp_log_name

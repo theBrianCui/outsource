@@ -48,15 +48,13 @@ def outsource(arguments, resource_group, virtual_machine, upload_working_dir=Fal
 
     job_name, program_script_path, nohup_script_name, remote_log_name = sshtools.create_job(ARGUMENT_STRING_FULL, email)
 
-    print("Job: {}".format(job_name))
-
     # install dependencies
     if not sshtools.check_remote_program_exists(vm_ip, ARGUMENT_PROGRAM):
         print("{} does not exist on the remote machine.".format(ARGUMENT_PROGRAM))
         if not sshtools.remote_install_program(vm_ip, ARGUMENT_PROGRAM):
             raise RuntimeError("Could not remotely install {}.".format(ARGUMENT_PROGRAM))
 
-    print("{} program exists".format(ARGUMENT_PROGRAM))
+    print("{} program exists on remote VM.".format(ARGUMENT_PROGRAM))
 
     # search for local file dependencies in the command line
     if upload_working_dir:
@@ -68,7 +66,7 @@ def outsource(arguments, resource_group, virtual_machine, upload_working_dir=Fal
                 sshtools.upload_job_file(arg, vm_ip, job_name)
 
     sshtools.upload_script(program_script_path, vm_ip)
-    sshtools.upload_script(nohup_script_name, vm_ip)
+    # sshtools.upload_script(nohup_script_name, vm_ip)
     script_pid = sshtools.run_remote_script(nohup_script_name, vm_ip)[1:-1]
     print("{} job now running, output redirected to {}".format(ARGUMENT_PROGRAM, remote_log_name))
     command_pid = sshtools.run_remote_command(vm_ip, "pgrep -P %s" % script_pid)[1:-1]
